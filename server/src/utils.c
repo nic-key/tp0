@@ -5,9 +5,9 @@ t_log* logger;
 int iniciar_servidor(void)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
+	//assert(!"no implementado!");
 
-	int socket_servidor;
+	//int socket_servidor; COMENTADO, ES LO QUE NOSOTROS LLAMAMOS fd_escucha
 
 	struct addrinfo hints, *servinfo, *p;
 
@@ -18,28 +18,39 @@ int iniciar_servidor(void)
 
 	getaddrinfo(NULL, PUERTO, &hints, &servinfo);
 
+	/* getaddrinfo(NULL, "4444", &hints, &servinfo); //copiado textual, se cambia server_info a servinfo */
+
 	// Creamos el socket de escucha del servidor
+	int fd_escucha = socket(servinfo->ai_family,
+                        servinfo->ai_socktype,
+                        servinfo->ai_protocol);//copiado textual, se cambia server_info a servinfo
 
 	// Asociamos el socket a un puerto
+	setsockopt(fd_escucha, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int));
+
+	bind(fd_escucha, servinfo->ai_addr, servinfo->ai_addrlen);
 
 	// Escuchamos las conexiones entrantes
+	listen(fd_escucha, SOMAXCONN);
 
 	freeaddrinfo(servinfo);
 	log_trace(logger, "Listo para escuchar a mi cliente");
 
-	return socket_servidor;
+	return fd_escucha; //CAMBIAMOS EL NOMBRE DE socket_servidor A fd_escucha;
 }
 
 int esperar_cliente(int socket_servidor)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
+	//assert(!"no implementado!");
 
 	// Aceptamos un nuevo cliente
-	int socket_cliente;
+	//int socket_cliente; COMENTADO, USAMOS EL DE ABAJO
+	int fd_conexion = accept(socket_servidor, NULL, NULL); //CAMBIAMOS NOMBRE DE fd_escucha A socket_servidor
+	
 	log_info(logger, "Se conecto un cliente!");
 
-	return socket_cliente;
+	return fd_conexion; //CAMBIAMOS EL NOMBRE DE socket_cliente A fd_conexion
 }
 
 int recibir_operacion(int socket_cliente)
